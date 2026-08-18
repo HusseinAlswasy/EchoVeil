@@ -1,9 +1,10 @@
 import { Router } from "express";
 import * as userServices from './user.services.js';
+import { auth } from "../common/middleware/authentication.js";
 const userRouter = Router()
 
 userRouter.post("/signUp", userServices.signUp)
 userRouter.post("/login", userServices.login)
-userRouter.get("/profile/:id", userServices.getProfile)
+userRouter.get("/profile",auth, userServices.getProfile)
 
-export default userRouter
+export default userRouter   
