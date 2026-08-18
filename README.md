@@ -30,14 +30,26 @@ The Node.js backend is currently under development, followed by a Flutter mobile
 - User login
 - User profile retrieval
 - MongoDB integration
+- JWT authentication
+- Protected user profile endpoint
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/users/signUp` | Create a new account |
-| POST | `/users/login` | Log in to an account |
-| GET | `/users/profile/:id` | Get a user profile |
+| Method | Endpoint         | Description                          |
+| ------ | ---------------- | ------------------------------------ |
+| POST   | `/users/signUp`  | Create a new account                 |
+| POST   | `/users/login`   | Log in and receive an access token   |
+| GET    | `/users/profile` | Get the authenticated user's profile |
+
+## Authentication
+
+Protected endpoints require a JWT access token.
+
+```text
+Authorization: Bearer YOUR_ACCESS_TOKEN
+```
+
+Use `POST /users/login` to receive an `accessToken`.
 
 ## Getting Started
 
