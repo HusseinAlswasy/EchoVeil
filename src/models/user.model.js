@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { userProvider } from "../enums/enums.js";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -23,7 +24,9 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: function () {
+            return this.provider === userProvider.system
+        },
         trim: true,
     },
     phone: {
@@ -32,7 +35,9 @@ const userSchema = new mongoose.Schema({
     },
     age: {
         type: Number,
-        required: true,
+        required: function () {
+            return this.provider === userProvider.system
+        },
         min: 18,
         max: 70,
     },
@@ -43,12 +48,15 @@ const userSchema = new mongoose.Schema({
     },
     provider: {
         type: String,
-        enum: ["system", "google"],
-        default: "system"
+        enum: Object.values(userProvider),
+        default: userProvider.system
     },
     isConfirmed: {
         type: Boolean,
         default: false
+    },
+    profileImage: {
+        type: String,
     }
 }, {
     strict: true,

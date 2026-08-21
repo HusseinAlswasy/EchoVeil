@@ -1,12 +1,13 @@
 import express from "express";
 import connect from "./DB/connectionDB.js";
 import userRouter from "./modules/user.controller.js";
+import cors from 'cors';
 const app = express();
 const port = 3000;
 
 const appBootStrap = async () => {
 
-    app.use(express.json());
+    app.use(cors(), express.json());
     await connect()
 
     app.use("/users", userRouter)
