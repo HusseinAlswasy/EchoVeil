@@ -61,7 +61,7 @@ export const login = async (req, res) => {
 
     const user = await dbServices.findOne({
         model: userModel,
-        data: { email, provider: UserProvider.system },
+        data: { email, provider: userProvider.system },
     })
     if (!user) {
         throw new Error("User Not Exist");

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { userProvider } from "../enums/enums.js";
+import { userGender, userProvider, userRoles } from "../enums/enums.js";
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -43,13 +43,18 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        enum: ["male", "female"],
-        default: "male",
+        enum: Object.values(userGender),
+        default: userGender.male,
     },
     provider: {
         type: String,
         enum: Object.values(userProvider),
         default: userProvider.system
+    },
+    role: {
+        type: String,
+        enum: Object.values(userRoles),
+        default: userRoles.user
     },
     isConfirmed: {
         type: Boolean,

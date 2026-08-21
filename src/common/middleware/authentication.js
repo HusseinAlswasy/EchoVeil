@@ -2,7 +2,7 @@
 import userModel from '../../models/user.model.js';
 import { verifyToken } from '../utils/token/token.services.js';
 
-export const auth = async (req, res, next) => {
+export const authentication = async (req, res, next) => {
     const authorization = req.headers.authorization;
 
     if (!authorization?.startsWith("Bearer ")) {
