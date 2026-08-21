@@ -16,6 +16,8 @@ The Node.js backend is currently under development, followed by a Flutter mobile
 - Mongoose
 - bcrypt
 - Node.js Crypto
+- JWT
+- Google OAuth
 
 ### Mobile — Planned
 
@@ -32,6 +34,8 @@ The Node.js backend is currently under development, followed by a Flutter mobile
 - MongoDB integration
 - JWT authentication
 - Protected user profile endpoint
+- Role based authorization
+-Google Authentication
 
 ## API Endpoints
 
