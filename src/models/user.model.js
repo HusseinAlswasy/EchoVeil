@@ -72,10 +72,11 @@ const userSchema = new mongoose.Schema({
 })
 
 userSchema.virtual("fullName", {})
-    .set(function (value) {
-        const [firstName, lastName] = value.split(" ");
-        this.set({ firstName, lastName });
-    }).get(function () {
+    // .set(function (value) {
+    //     const [firstName, lastName] = value.split(" ");
+    //     this.set({ firstName, lastName });
+    // })
+    .get(function () {
         return this.firstName + " " + this.lastName;
     })
 

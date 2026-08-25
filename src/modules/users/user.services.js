@@ -1,14 +1,16 @@
-import userModel from "../models/user.model.js";
-import * as dbServices from '../DB/db.services.js';
-import { encrypt, decrypt } from "../common/security/encrypt.js";
-import { hash, compareHash } from "../common/security/hash.js";
-import { generateToken } from "../common/utils/token/token.services.js";
+import userModel from "../../models/user.model.js";
+import * as dbServices from '../../DB/db.services.js';
+import { encrypt, decrypt } from "../../common/security/encrypt.js";
+import { hash, compareHash } from "../../common/security/hash.js";
+import { generateToken } from "../../common/utils/token/token.services.js";
 import { OAuth2Client } from 'google-auth-library';
-import { userProvider } from "../enums/enums.js";
+import { userProvider } from "../../enums/enums.js";
+import { successResponse } from "../../common/utils/sucsess.response.js";
 
 
 export const signUp = async (req, res) => {
-    const { fullName, email, password, phone, age, gender } = req.body;
+    const { firstName, lastName, email, password, phone, age, gender } = req.body;
+
     const userExist = await userModel.findOne({ email });
     if (userExist) {
         throw new Error("Email Already Exist", { cause: 409 });
@@ -16,10 +18,10 @@ export const signUp = async (req, res) => {
 
     const user = await dbServices.create({
         model: userModel,
-        data: { fullName, email, password: await hash(password), phone: encrypt(phone), age, gender },
+        data: { firstName, lastName, email, password: await hash(password), phone: encrypt(phone), age, gender },
     });
 
-    res.status(201).json({ message: "User Created Successfuly", user });
+    successResponse({ res, status: 200, data: user })
 }
 
 export const signUpWithGmail = async (req, res) => {
@@ -51,7 +53,7 @@ export const signUpWithGmail = async (req, res) => {
         options: { expiresIn: "1h" },
     },);
 
-    res.status(200).json({ message: "User Login Successfuly", accessToken });
+    successResponse({ res, status: 201, data: accessToken })
 
 }
 
@@ -80,9 +82,10 @@ export const login = async (req, res) => {
         options: { expiresIn: "1h" },
     },);
 
-    res.status(200).json({ message: "User Login Successfuly", accessToken });
+    successResponse({ res, status: 201, data: accessToken })
 }
 
 export const getProfile = async (req, res) => {
-    res.status(200).json({ message: "User Geted Successfuly", user: req.user });
+    successResponse({ res, status: 201, data: req.user });
+
 }

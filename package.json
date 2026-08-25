@@ -17,7 +17,9 @@
     "crypto": "^1.0.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "goi": "^0.19.3",
     "google-auth-library": "^11.0.2",
+    "joi": "^18.2.5",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1"
   }
