@@ -21,7 +21,7 @@ export const signUp = async (req, res) => {
         data: { firstName, lastName, email, password: await hash(password), phone: encrypt(phone), age, gender },
     });
 
-    successResponse({ res, status: 200, data: user })
+    successResponse({ res, status: 200 })
 }
 
 export const signUpWithGmail = async (req, res) => {
