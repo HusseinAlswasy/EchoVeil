@@ -1,20 +1,30 @@
 import joi from "joi"
 import { userGender } from "../../enums/enums.js"
+import { general_rules } from "../../common/utils/generalRules.js"
 
 export const signUpSchema = {
     body: joi.object({
-        firstName: joi.string().min(2).max(12).alphanum().required(),
-        lastName: joi.string().min(2).max(12).alphanum().required(),
-        email: joi.string().email().required(),
-        password: joi.string().required(),
+        firstName: joi.string().min(2).max(12).required().messages({
+            "any.required": "First Name is Required",
+            "string.empty": "First Name Cannot Be Empty"
+        }),
+        lastName: joi.string().min(2).max(12).required(),
+        email: general_rules.email.required(),
+        password: general_rules.password.required(),
         cPassword: joi.string().valid(joi.ref("password")).required(),
         gender: joi.string().valid(userGender.male, userGender.female).required(),
         age: joi.number().integer().positive().required(),
         phone: joi.string().required(),
-    }).required(),
-    // query: joi.object({
-    //     flag: joi.boolean().required()
-    // }).required()
+    }).required().messages({
+        "any.required": "Body Data is Required"
+    }),
+
+    files: joi.object({
+        image: joi.array().items(general_rules.file.required()).length(1).required(),
+
+        images: joi.array().items(general_rules.file.required()).max(2).required(),
+
+    })
 }
 
 export const loginSchema = {

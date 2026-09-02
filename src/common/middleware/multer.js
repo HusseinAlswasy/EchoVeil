@@ -2,6 +2,8 @@
 import multer from "multer";
 import fs from "node:fs";
 import { resolve } from "node:path";
+
+
 export const multerLocal = ({ customPath = "general", customTypes = [] }) => {
     const dir_path = `uploads/${customPath}`;
     if (!fs.existsSync(dir_path)) {
@@ -18,13 +20,16 @@ export const multerLocal = ({ customPath = "general", customTypes = [] }) => {
     })
 
     function fileFilter(req, file, cb) {
-        // console.log({ file });  // type file in console
-        if (!customTypes.includes(file.mimetype)) {
-            cb(new Error('Invalid File Type'))
+        const ext = file.originalname.split(".").pop().toLowerCase();
+        const allowedExt = ["jpg", "jpeg", "png", "gif", "webp"];
+
+        if (!customTypes.includes(file.mimetype) && !allowedExt.includes(ext)) {
+            cb(new Error("Invalid File Type"));
         } else {
-            cb(null, true)
+            cb(null, true);
         }
     }
+
 
     const upload = multer({ storage, fileFilter })
     return upload

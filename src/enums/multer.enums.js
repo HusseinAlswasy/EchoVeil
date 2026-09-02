@@ -1,5 +1,10 @@
 
 export const fileTypes = {
-    image: ["image/png","image/jpeg"],
-    video: ["video/mp4"]
+    image: ["image/jpeg", "image/png", "image/jpg", "image/gif", "image/webp"],
+
+    video: [
+        "video/mp4",
+        "video/quicktime",
+        "video/mpeg"
+    ]
 }

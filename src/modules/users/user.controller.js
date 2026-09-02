@@ -9,11 +9,13 @@ import { multerLocal } from "../../common/middleware/multer.js";
 import { fileTypes } from "../../enums/multer.enums.js";
 
 const userRouter = Router()
-userRouter.post("/signUp", multerLocal({ customPath: "users", customTypes:[ ...fileTypes.image,...fileTypes.video] }).single("image"),
-     validation(uS.signUpSchema),
+userRouter.post("/signUp",
+    multerLocal({ customPath: "users", customTypes: fileTypes.image })
+        .fields([{ name: "image", maxCount: 1 }, { name: "images", maxCount: 2 }]),
+    validation(uS.signUpSchema),
     userServices.signUp)
 userRouter.post("/signup/gmail", userServices.signUpWithGmail)
 userRouter.post("/login", validation(uS.loginSchema), userServices.login)
 userRouter.get("/profile", authentication, authorization(Object.values(userRoles)), userServices.getProfile)
-
+userRouter.post("/refresh-Token", userServices.refreshToken) 
 export default userRouter   

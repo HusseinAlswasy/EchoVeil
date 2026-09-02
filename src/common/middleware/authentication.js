@@ -12,7 +12,6 @@ export const authentication = async (req, res, next) => {
     }
     const token = authorization.split(" ")[1];
 
-
     const decode = verifyToken({ token, secretKey: process.env.JWT_SECRET });
 
     if (!decode || !decode.id) {
@@ -28,5 +27,4 @@ export const authentication = async (req, res, next) => {
     req.user = user
 
     next()
-
 }
