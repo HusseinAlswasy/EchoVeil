@@ -4,6 +4,11 @@ import fs from 'fs/promises'
 
 export const general_rules = {
 
+    id: joi.string().custom((value, helper) => {
+        const isValid = Types.ObjectId.isValid(value);
+        return isValid ? value : helper.message("Invalid Id")
+    }),
+
     email: joi.string().email(),
     password: joi.string()
         .regex(/^[A-Z]?[a-zA-Z0-9]{8}$/),

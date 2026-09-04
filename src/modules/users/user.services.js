@@ -7,8 +7,9 @@ import { OAuth2Client } from 'google-auth-library';
 import { userProvider } from "../../enums/enums.js";
 import { successResponse } from "../../common/utils/sucsess.response.js";
 import { deleteUploadedFiles } from "../../common/utils/generalRules.js";
+import { compare } from "bcrypt";
 
-
+//===========================sign Up===================================
 export const signUp = async (req, res) => {
     const { firstName, lastName, email, password, phone, age, gender } = req.body;
 
@@ -42,7 +43,7 @@ export const signUp = async (req, res) => {
 
     successResponse({ res, status: 200, data: user })
 }
-
+//===========================sign Up With Gmail===================================
 export const signUpWithGmail = async (req, res) => {
     const { idToken } = req.body;
     const client = new OAuth2Client();
@@ -88,7 +89,7 @@ export const signUpWithGmail = async (req, res) => {
     });
 
 }
-
+//===========================login===================================
 export const login = async (req, res) => {
 
     const { email, password } = req.body;
@@ -126,12 +127,52 @@ export const login = async (req, res) => {
         data: { accessToken, refreshToken },
     })
 }
-
+//===========================get Profile===================================
 export const getProfile = async (req, res) => {
-    successResponse({ res, status: 201, data: req.user });
-
+    let phone = decrypt(req.user.phone)
+    successResponse({ res, status: 201, data: { ...req.user._doc, phone } });
 }
+//===========================share Profile===================================
+export const shareProfile = async (req, res) => {
+    const { id } = req.params;
+    const user = await dbServices.findById({ model: userModel, id, options: { select: "-password" } });
+    if (!user) {
+        throw new Error(
+            "User Not Exist",
+            { cause: 404 }
+        )
+    }
+    successResponse({ res, status: 201, data: user });
+}
+//===========================update Profile===================================
+export const updateProfile = async (req, res) => {
+    const { firstName, lastName, phone, age, gender } = req.body;
+    let updateQuery = {};
+    if (firstName !== undefined) updateQuery.firstName = firstName;
+    if (lastName !== undefined) updateQuery.lastName = lastName;
+    if (phone !== undefined) updateQuery.phone = encrypt(phone);
+    if (age !== undefined) updateQuery.age = age;
+    if (gender !== undefined) updateQuery.gender = gender;
 
+    const user = await dbServices.findOneAndUpdate({
+        model: userModel,
+        filter: { _id: req.user._id },
+        update: updateQuery,
+    })
+    successResponse({ res, status: 201, data: user });
+}
+//===========================update Password===================================
+export const updatePassword = async (req, res) => {
+    const { oldPassword, newPassword } = req.body;
+    const user = await userModel.findById(req.user._id).select("+password");
+    if (!user || !(await compareHash(oldPassword, user.password))) {
+        throw new Error("Old Password Not Correct", { cause: 400 });
+    }
+    user.password = await hash(newPassword);
+    await user.save();
+    successResponse({ res, status: 201, data: user });
+}
+//===========================refresh Token===================================
 export const refreshToken = async (req, res) => {
     const authorization = req.headers.authorization || req.body?.authorization;
 

@@ -1,6 +1,7 @@
 import joi from "joi"
 import { userGender } from "../../enums/enums.js"
 import { general_rules } from "../../common/utils/generalRules.js"
+import { Types } from "mongoose"
 
 export const signUpSchema = {
     body: joi.object({
@@ -27,10 +28,34 @@ export const signUpSchema = {
     })
 }
 
+export const updateSchema = {
+    body: joi.object({
+        firstName: joi.string(),
+        lastName: joi.string(),
+        gender: joi.string().valid(userGender.male, userGender.female),
+        age: joi.number().integer().positive(),
+        phone: joi.string(),
+    }).required()
+}
+
+export const updatePasswordSchema = {
+    body: joi.object({
+        oldPassword: general_rules.password.required(),
+        newPassword: general_rules.password.required(),
+        cPassword: joi.string().valid(joi.ref("newPassword")).required(),
+    }).required()
+}
+
 export const loginSchema = {
     body: joi.object({
         email: joi.string().email().required(),
         password: joi.string().required(),
+    }).required()
+}
+
+export const idSchema = {
+    params: joi.object({
+        id: general_rules.id.required(),
     }).required()
 
 }
