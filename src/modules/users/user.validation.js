@@ -59,3 +59,10 @@ export const idSchema = {
     }).required()
 
 }
+
+export const logoutSchema = {
+    query: joi.object({
+        flag: joi.string().valid("all", "current").required()
+    }).required()
+
+}

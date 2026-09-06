@@ -7,6 +7,8 @@ import { OAuth2Client } from 'google-auth-library';
 import { userProvider } from "../../enums/enums.js";
 import { successResponse } from "../../common/utils/sucsess.response.js";
 import { deleteUploadedFiles } from "../../common/utils/generalRules.js";
+import { randomUUID } from "node:crypto";
+import revokedTokenModel from "../../models/revokedToken.model.js";
 import { compare } from "bcrypt";
 
 //===========================sign Up===================================
@@ -108,17 +110,21 @@ export const login = async (req, res) => {
     if (!isMatched) {
         return res.status(401).json({ message: "Password Not Correct" });
     }
-
+    let idToken = randomUUID()
     const accessToken = generateToken({
         payload: { id: user._id },
         secretKey: process.env.JWT_SECRET,
-        options: { expiresIn: "1h" },
+        options: {
+            expiresIn: "1h", jwtid: idToken
+        },
     },);
 
     const refreshToken = generateToken({
         payload: { id: user._id },
         secretKey: process.env.JWT_REFRESH_SECRET,
-        options: { expiresIn: "1y" },
+        options: {
+            expiresIn: "1y", jwtid: idToken,
+        },
     },);
 
     successResponse({
@@ -203,4 +209,23 @@ export const refreshToken = async (req, res) => {
 
     successResponse({ res, status: 201, data: accessToken });
 
+}
+//===========================Log Out===================================
+export const logout = async (req, res, next) => {
+    const { flag } = req.query
+    if (flag == "all") {
+        req.user.changeCredential = new Date()
+        await req.user.save()
+    } else {
+        await dbServices.create({
+            model: revokedTokenModel,
+            data: {
+                userId: req.user._id,
+                tokenId: req.decode.jti, // id token new 
+                expireAt: new Date(req.decode.exp * 1000)
+            }
+        })
+    }
+
+    successResponse({ res, status: 201, message: "Logout Success" })
 }

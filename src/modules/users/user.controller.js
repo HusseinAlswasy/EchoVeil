@@ -29,6 +29,8 @@ userRouter.patch("/update/profile",validation(uV.updateSchema),authentication,uS
 
 userRouter.patch("/update/password",validation(uV.updatePasswordSchema),authentication,uS.updatePassword)
 
+userRouter.patch("/logout",validation(uV.logoutSchema),authentication,uS.logout)
+
 
 
 export default userRouter   

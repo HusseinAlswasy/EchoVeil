@@ -65,6 +65,9 @@ const userSchema = new mongoose.Schema({
     },
     coverImage: {
         type: [String],
+    },
+    changeCredential: {
+        type: Date,
     }
 }, {
     strict: true,
