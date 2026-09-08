@@ -1,5 +1,5 @@
 import userModel from "../../models/user.model.js";
-import * as dbServices from '../../DB/db.services.js';
+import * as dbServices from '../../DB/services/db.services.js';
 import { encrypt, decrypt } from "../../common/security/encrypt.js";
 import { hash, compareHash } from "../../common/security/hash.js";
 import { generateToken, verifyToken } from "../../common/utils/token/token.services.js";
@@ -10,6 +10,7 @@ import { deleteUploadedFiles } from "../../common/utils/generalRules.js";
 import { randomUUID } from "node:crypto";
 import revokedTokenModel from "../../models/revokedToken.model.js";
 import { compare } from "bcrypt";
+import * as redisServices from "../../DB/services/redis_db.services.js";
 
 //===========================sign Up===================================
 export const signUp = async (req, res) => {
@@ -115,7 +116,7 @@ export const login = async (req, res) => {
         payload: { id: user._id },
         secretKey: process.env.JWT_SECRET,
         options: {
-            expiresIn: "1h", jwtid: idToken
+            expiresIn: 60 , jwtid: idToken
         },
     },);
 
@@ -216,15 +217,21 @@ export const logout = async (req, res, next) => {
     if (flag == "all") {
         req.user.changeCredential = new Date()
         await req.user.save()
+        await redisServices.deleteKey(await redisServices.keys(`revoke_token:${req.user._id}`))
     } else {
-        await dbServices.create({
-            model: revokedTokenModel,
-            data: {
-                userId: req.user._id,
-                tokenId: req.decode.jti, // id token new 
-                expireAt: new Date(req.decode.exp * 1000)
-            }
+        await redisServices.setValue({
+            key: `revoke_token:${req.user._id}:${req.decode.jti}`,
+            value: `${req.decode.jti}`,
+            ttl: req.decode.exp - Math.floor(Date.now() / 1000)
         })
+        // await dbServices.create({
+        //     model: revokedTokenModel,
+        //     data: {
+        //         userId: req.user._id,
+        //         tokenId: req.decode.jti, // id token new 
+        //         expireAt: new Date(req.decode.exp * 1000)
+        //     }
+        // })
     }
 
     successResponse({ res, status: 201, message: "Logout Success" })

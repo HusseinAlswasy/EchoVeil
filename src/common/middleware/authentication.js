@@ -1,8 +1,9 @@
 
 import userModel from '../../models/user.model.js';
-import * as dbServices from '../../DB/db.services.js';
+import * as dbServices from '../../DB/services/db.services.js';
 import { verifyToken } from '../utils/token/token.services.js';
 import revokedTokenModel from '../../models/revokedToken.model.js';
+import * as redisServices from "../../DB/services/redis_db.services.js";
 
 export const authentication = async (req, res, next) => {
     const authorization = req.headers.authorization;
@@ -26,15 +27,16 @@ export const authentication = async (req, res, next) => {
     if (!user) {
         throw new Error("User Not Exist");
     }
-    if (user?.changeCredential?.getTime() > decode?.iat * 1000) {
-        throw new Error("you are logout please login again ");
+    const revokedToken = await redisServices.getValue(
+        `revoke_token:${user._id}:${decode.jti}`
+    );
+
+    if (revokedToken) {
+        throw new Error("you are logout please login again...", {
+            cause: 401
+        });
     }
-    if (await dbServices.findOne({
-        model: revokedTokenModel,
-        filter: { tokenId: decode.jti }
-    })) {
-        throw new Error("you are logout please login again... ");
-    }
+
     req.user = user
     req.decode = decode;
 
