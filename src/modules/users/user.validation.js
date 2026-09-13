@@ -20,12 +20,12 @@ export const signUpSchema = {
         "any.required": "Body Data is Required"
     }),
 
-    files: joi.object({
-        image: joi.array().items(general_rules.file.required()).length(1).required(),
+    // files: joi.object({
+    //     image: joi.array().items(general_rules.file.required()).length(1).required(),
 
-        images: joi.array().items(general_rules.file.required()).max(2).required(),
+    //     images: joi.array().items(general_rules.file.required()).max(2).required(),
 
-    })
+    // })
 }
 
 export const updateSchema = {
@@ -52,6 +52,14 @@ export const loginSchema = {
         password: joi.string().required(),
     }).required()
 }
+
+export const confirmEmailSchema = {
+    body: joi.object({
+        email: joi.string().email().required(),
+        otp: joi.string().length(6).pattern(/^[0-9]{6}$/).required(),
+    }).required()
+}
+
 
 export const idSchema = {
     params: joi.object({

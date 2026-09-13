@@ -17,6 +17,10 @@ userRouter.post("/signUp",
 
 userRouter.post("/signup/gmail", uS.signUpWithGmail)
 
+userRouter.patch("/confirmEmail",validation(uV.confirmEmailSchema), uS.confirm)
+
+userRouter.post("/resend-otp", uS.resendOtp)
+
 userRouter.post("/login", validation(uV.loginSchema), uS.login)
 
 userRouter.get("/profile", authentication, authorization(Object.values(userRoles)), uS.getProfile)

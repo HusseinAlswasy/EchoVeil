@@ -1,5 +1,9 @@
 import { redis_client } from '../../DB/connectionRedis.js';
 
+export const max_otp_key = async (email)=>{
+    return `otp::${email}::max`
+}
+
 export const setValue = async ({ key, value, ttl } = {}) => {
     try {
         value = typeof value == 'string' ? value : JSON.stringify(value);
@@ -21,7 +25,7 @@ export const updateValue = async ({ key, value, ttl } = {}) => {
 export const getValue = async (key) => {
     try {
         try {
-            return JSON.parse(await redis_client.get(key));
+            return await JSON.parse(await redis_client.get(key));
         } catch (error) {
             return await redis_client.get(key);
         }
@@ -68,5 +72,13 @@ export const keys = async (pattern) => {
         return await redis_client.keys(`${pattern}*`);
     } catch (error) {
         console.log(error, `\nRedis key Failed`);
+    }
+}
+
+export const incr = async (email) => {
+    try {
+        return await redis_client.incr(await max_otp_key(email));
+    } catch (error) {
+        console.log(error, `\nRedis incr Failed`);
     }
 }

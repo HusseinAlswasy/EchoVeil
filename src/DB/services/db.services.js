@@ -28,7 +28,9 @@ export const findById = async ({ model, id, options = {} } = {}) => {
 }
 
 export const findOneAndUpdate = async ({ model, filter = {}, update = {}, options = {} } = {}) => {
-   
- const docs = model.findOneAndUpdate(filter, update, {...options, runValidators: true ,new:true})
- return await docs.exec()
+
+    const docs = model.findOneAndUpdate(filter, update, {
+        ...options, runValidators: true, returnDocument: "after"
+    })
+    return await docs.exec()
 }

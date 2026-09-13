@@ -56,10 +56,8 @@ const userSchema = new mongoose.Schema({
         enum: Object.values(userRoles),
         default: userRoles.user
     },
-    isConfirmed: {
-        type: Boolean,
-        default: false
-    },
+    isConfirmed: Boolean,
+
     profileImage: {
         type: String,
     },
