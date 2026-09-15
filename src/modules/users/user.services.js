@@ -12,8 +12,69 @@ import revokedTokenModel from "../../models/revokedToken.model.js";
 import { compare } from "bcrypt";
 import * as redisServices from "../../DB/services/redis_db.services.js";
 import sendEmail, { otp } from "../../common/service/send_email.js";
-import { eventEmitter } from "../../common/utils/events/sendEmailEvent.js";
+import { event_name, eventEmitter } from "../../common/utils/events/sendEmailEvent.js";
+import { emailTemplate } from "../../common/utils/email.template.js";
 
+const sendEmailOtp = async ({ email, confirmed } = {}) => {
+    // check if he blocked
+    const isBlocked = await redisServices.ttl(`block_otp_key:${email}::block`)
+    if (isBlocked > 0) {
+        throw new Error(`You Blocked. and you can resend otp after  ${isBlocked} seconds.`, { cause: 400 });
+
+    }
+    const otTtl = await redisServices.ttl(`otp:${email}`);
+    if (otTtl > 0) {
+        throw new Error(`OTP already sent. Please wait ${otTtl} seconds before requesting a new one.`, { cause: 400 });
+    }
+
+    const maxOtpKey = await redisServices.getValue(await redisServices.max_otp_key(email));
+
+    if (maxOtpKey >= 3) {
+        await redisServices.setValue({
+            key: `block_otp_key:${email}::block`,
+            value: "1",
+            ttl: 60
+        })
+        await redisServices.deleteKey(
+            await redisServices.max_otp_key(email)
+        );
+        throw new Error(`You have exceeded the maximum number of OTP requests. Please try again later.`, { cause: 400 });
+
+    }
+    const user = await dbServices.findOne(
+        {
+            model: userModel,
+            filter: { email, isConfirmed: { $exists: confirmed } },
+        }
+    )
+    if (!user) {
+        throw new Error("Email Already Exist or Already Confirmed", { cause: 404 });
+    }
+    const otpCode = await otp()
+
+    const emailSent = await sendEmail({
+        to: email,
+        subject: "Email Verification",
+        html: emailTemplate(
+            {
+                firstName: user.firstName,
+                email,
+                otp: otpCode,
+            }
+        ),
+    })
+    if (!emailSent) {
+        throw new Error("Failed to send verification email", { cause: 500 });
+    }
+
+    await redisServices.setValue({
+        key: `otp:${email}`,
+        value: await hash(`${otpCode}`),
+        ttl: 60 // 1 minutes 
+    });
+
+    await redisServices.incr(email);
+}
 //===========================sign Up===================================
 export const signUp = async (req, res) => {
     const { firstName, lastName, email, password, phone, age, gender } = req.body;
@@ -31,13 +92,17 @@ export const signUp = async (req, res) => {
     //     }
     // }
     const otpCode = await otp()
-    const otpHashed = hash(otpCode.toString())
-    eventEmitter.emit("confirmEmail", async () => {
+    const otpHashed = await hash(otpCode.toString())
+    eventEmitter.emit(event_name.confirmEmail, async () => {
 
         const emailSent = await sendEmail({
             to: email,
             subject: "Email Verification",
-            html: `<h1>Verify Your Email</h1><p>Your OTP code is: <strong>${otpCode}</strong></p>`,
+            html: emailTemplate({
+                firstName,
+                email,
+                otp: otpCode,
+            }),
         })
 
         if (!emailSent) {
@@ -107,55 +172,7 @@ export const confirm = async (req, res) => {
 //===========================Resend OTp===================================
 export const resendOtp = async (req, res) => {
     const { email } = req.body;
-    // check if he blocked
-    const isBlocked = await redisServices.ttl(`block_otp_key:${email}::block`)
-    if (isBlocked > 0) {
-        throw new Error(`You Blocked. and you can resend otp after  ${isBlocked} seconds.`, { cause: 400 });
-
-    }
-    const otTtl = await redisServices.ttl(`otp:${email}`);
-    if (otTtl > 0) {
-        throw new Error(`OTP already sent. Please wait ${otTtl} seconds before requesting a new one.`, { cause: 400 });
-    }
-
-    const maxOtpKey = await redisServices.getValue(await redisServices.max_otp_key(email));
-
-    if (maxOtpKey >= 3) {
-        await redisServices.setValue({
-            key: `block_otp_key:${email}::block`,
-            value: "1",
-            ttl: 60
-        })
-        throw new Error(`You have exceeded the maximum number of OTP requests. Please try again later.`, { cause: 400 });
-    }
-    const user = await dbServices.findOne(
-        {
-            model: userModel,
-            filter: { email, isConfirmed: { $exists: false } },
-        }
-    )
-    if (!user) {
-        throw new Error("Email Already Exist or Already Confirmed", { cause: 404 });
-    }
-    const otpCode = await otp()
-
-    const emailSent = await sendEmail({
-        to: email,
-        subject: "Email Verification",
-        html: `<h1>Verify Your Email</h1><p>Your OTP code is: <strong>${otpCode}</strong></p>`,
-    })
-    if (!emailSent) {
-        throw new Error("Failed to send verification email", { cause: 500 });
-    }
-
-    await redisServices.setValue({
-        key: `otp:${email}`,
-        value: await hash(`${otpCode}`),
-        ttl: 60 // 1 minutes 
-    });
-
-    await redisServices.incr(email);
-
+    await sendEmailOtp({ email, confirmed: false })
 
     successResponse({ res, status: 200, data: { message: "Email Confirmed Successfuly" } })
 }
@@ -292,6 +309,45 @@ export const updatePassword = async (req, res) => {
     user.password = await hash(newPassword);
     await user.save();
     successResponse({ res, status: 201, data: user });
+}
+//===========================forget Password===================================
+export const forgetPassword = async (req, res) => {
+    const { email } = req.body;
+
+    await sendEmailOtp({ email, confirmed: true })
+
+    successResponse({ res, status: 201, data: "otp send successfuly to forget password" });
+}
+//===========================forget Password===================================
+export const resetPassword = async (req, res) => {
+    const { email, code, password } = req.body;
+
+    const otpExist = await redisServices.getValue(`otp:${email}`);
+    if (!otpExist) {
+        throw new Error("OTP Expired Or Not Exist", { cause: 400 });
+    }
+    const isValid = await compare(code, otpExist);
+
+    if (!isValid) {
+        throw new Error("Invalid OTP", { cause: 400 });
+    }
+    const user = await dbServices.findOneAndUpdate(
+        {
+            model: userModel,
+            filter: { email, isConfirmed: true },
+            update: {
+                password: await hash(password),
+                changeCredential: new Date()
+            }
+        }
+    )
+    if (!user) {
+        throw new Error("Email Not Exist or Already Not Confirmed", { cause: 404 });
+    }
+    await redisServices.deleteKey(`otp:${email}`)
+
+
+    successResponse({ res, status: 201, data: "password reset successfuly" });
 }
 //===========================refresh Token===================================
 export const refreshToken = async (req, res) => {

@@ -22,10 +22,13 @@ export const authentication = async (req, res, next) => {
         throw new Error("invalid payload token", { cause: 400 });
     }
 
-    const user = await userModel.findById(decode.id).select("-password");
+    const user = await userModel.findOne({
+        _id: decode.id,
+        isConfirmed: { $exists: true },
+    }).select("-password");
 
     if (!user) {
-        throw new Error("User Not Exist");
+        throw new Error("User Not Exist Or Not Confirmed");
     }
     const revokedToken = await redisServices.getValue(
         `revoke_token:${user._id}:${decode.jti}`

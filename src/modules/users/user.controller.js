@@ -33,6 +33,10 @@ userRouter.patch("/update/profile",validation(uV.updateSchema),authentication,uS
 
 userRouter.patch("/update/password",validation(uV.updatePasswordSchema),authentication,uS.updatePassword)
 
+userRouter.patch("/forget_password",uS.forgetPassword)
+
+userRouter.patch("/reset_password",uS.resetPassword)
+
 userRouter.patch("/logout",validation(uV.logoutSchema),authentication,uS.logout)
 
 
