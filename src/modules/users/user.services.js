@@ -16,28 +16,25 @@ import { event_name, eventEmitter } from "../../common/utils/events/sendEmailEve
 import { emailTemplate } from "../../common/utils/email.template.js";
 
 const sendEmailOtp = async ({ email, confirmed } = {}) => {
-    // check if he blocked
-    const isBlocked = await redisServices.ttl(`block_otp_key:${email}::block`)
+    const isBlocked = await redisServices.ttl(await redisServices.block_otp_key(email))
     if (isBlocked > 0) {
         throw new Error(`You Blocked. and you can resend otp after  ${isBlocked} seconds.`, { cause: 400 });
 
     }
-    const otTtl = await redisServices.ttl(`otp:${email}`);
-    if (otTtl > 0) {
-        throw new Error(`OTP already sent. Please wait ${otTtl} seconds before requesting a new one.`, { cause: 400 });
+    const otpTtl = await redisServices.ttl(`otp:${email}`);
+    if (otpTtl > 0) {
+        throw new Error(`OTP already sent. Please wait ${otpTtl} seconds before requesting a new one.`, { cause: 400 });
     }
 
     const maxOtpKey = await redisServices.getValue(await redisServices.max_otp_key(email));
 
     if (maxOtpKey >= 3) {
         await redisServices.setValue({
-            key: `block_otp_key:${email}::block`,
+            key: await redisServices.block_otp_key(email),
             value: "1",
-            ttl: 60
+            ttl: 60 * 2
         })
-        await redisServices.deleteKey(
-            await redisServices.max_otp_key(email)
-        );
+
         throw new Error(`You have exceeded the maximum number of OTP requests. Please try again later.`, { cause: 400 });
 
     }
@@ -70,10 +67,10 @@ const sendEmailOtp = async ({ email, confirmed } = {}) => {
     await redisServices.setValue({
         key: `otp:${email}`,
         value: await hash(`${otpCode}`),
-        ttl: 60 // 1 minutes 
+        ttl: 30  // 1 minutes 
     });
 
-    await redisServices.incr(email);
+    await redisServices.incr(await redisServices.max_otp_key(email));
 }
 //===========================sign Up===================================
 export const signUp = async (req, res) => {
@@ -120,7 +117,7 @@ export const signUp = async (req, res) => {
     await redisServices.setValue({
         key: await redisServices.max_otp_key(email),
         value: 1,
-        ttl: 180 // 1 minutes 
+        ttl: 60 * 6// 1 minutes 
     });
 
 
@@ -149,7 +146,7 @@ export const confirm = async (req, res) => {
     if (!otpExist) {
         throw new Error("OTP Expired Or Not Exist", { cause: 400 });
     }
-    const isValid = await compare(otp, otpExist);
+    const isValid = await compareHash(otp, otpExist);
 
     if (!isValid) {
         throw new Error("Invalid OTP", { cause: 400 });
@@ -172,6 +169,7 @@ export const confirm = async (req, res) => {
 //===========================Resend OTp===================================
 export const resendOtp = async (req, res) => {
     const { email } = req.body;
+
     await sendEmailOtp({ email, confirmed: false })
 
     successResponse({ res, status: 200, data: { message: "Email Confirmed Successfuly" } })
@@ -326,7 +324,7 @@ export const resetPassword = async (req, res) => {
     if (!otpExist) {
         throw new Error("OTP Expired Or Not Exist", { cause: 400 });
     }
-    const isValid = await compare(code, otpExist);
+    const isValid = await compareHash(code, otpExist);
 
     if (!isValid) {
         throw new Error("Invalid OTP", { cause: 400 });
@@ -334,7 +332,7 @@ export const resetPassword = async (req, res) => {
     const user = await dbServices.findOneAndUpdate(
         {
             model: userModel,
-            filter: { email, isConfirmed: true },
+            filter: { email, isConfirmed: { $exists: true } },
             update: {
                 password: await hash(password),
                 changeCredential: new Date()
