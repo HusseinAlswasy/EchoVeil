@@ -1,6 +1,6 @@
 import joi from "joi"
 import fs from 'fs/promises'
-
+import { Types } from "mongoose";
 
 export const general_rules = {
 

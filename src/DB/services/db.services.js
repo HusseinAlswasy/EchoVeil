@@ -34,3 +34,24 @@ export const findOneAndUpdate = async ({ model, filter = {}, update = {}, option
     })
     return await docs.exec()
 }
+export const find = async ({ model, filter = {}, options = {} } = {}) => {
+    const docs = model.find(filter);
+
+    if (options.select) {
+        docs.select(options.select);
+    }
+
+    if (options.sort) {
+        docs.sort(options.sort);
+    }
+
+    if (options.skip) {
+        docs.skip(options.skip);
+    }
+
+    if (options.limit) {
+        docs.limit(options.limit);
+    }
+
+    return await docs.exec();
+};

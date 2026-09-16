@@ -9,6 +9,7 @@ import { multerLocal } from "../../common/middleware/multer.js";
 import { fileTypes } from "../../enums/multer.enums.js";
 
 const userRouter = Router()
+
 userRouter.post("/signUp",
     multerLocal({ customPath: "users", customTypes: fileTypes.image })
         .fields([{ name: "image", maxCount: 1 }, { name: "images", maxCount: 2 }]),

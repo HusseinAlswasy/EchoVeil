@@ -245,7 +245,7 @@ export const login = async (req, res) => {
         payload: { id: user._id },
         secretKey: process.env.JWT_SECRET,
         options: {
-            expiresIn: 60, jwtid: idToken
+            expiresIn: "1h", jwtid: idToken
         },
     },);
 
