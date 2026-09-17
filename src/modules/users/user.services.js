@@ -227,8 +227,7 @@ export const login = async (req, res) => {
 
     const user = await dbServices.findOne({
         model: userModel,
-        filter: { email, provider: userProvider.system },
-        isConfirmed: { $exists: true },
+        filter: { email, provider: userProvider.system, isConfirmed: { $exists: true } },
     })
     if (!user) {
         throw new Error("User Not Exist or Not Confirmed", { cause: 404 });
