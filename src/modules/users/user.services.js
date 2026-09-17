@@ -67,7 +67,7 @@ const sendEmailOtp = async ({ email, confirmed } = {}) => {
     await redisServices.setValue({
         key: `otp:${email}`,
         value: await hash(`${otpCode}`),
-        ttl: 30  // 1 minutes 
+        ttl: 60  // 1 minutes 
     });
 
     await redisServices.incr(await redisServices.max_otp_key(email));

@@ -1,15 +1,30 @@
 {
-  "name": "saraha",
+  "name": "echoveil",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "EchoVeil is a privacy-first anonymous messaging backend built with Node.js and Express.",
+  "main": "src/main.js",
   "scripts": {
     "start": "node src/main.js",
     "dev": "node --watch src/main.js"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "jwt",
+    "anonymous-messaging",
+    "backend"
+  ],
+  "author": "Hussein Alswasy",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HusseinAlswasy/EchoVeil.git"
+  },
+  "homepage": "https://github.com/HusseinAlswasy/EchoVeil",
+  "bugs": {
+    "url": "https://github.com/HusseinAlswasy/EchoVeil/issues"
+  },
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
