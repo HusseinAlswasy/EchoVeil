@@ -4,18 +4,19 @@ import connectionDB_redis from "./DB/connectionRedis.js";
 import userRouter from "./modules/users/user.controller.js";
 import cors from 'cors';
 import messageRouter from "./modules/messages/message.controller.js";
+import { PORT } from "../config/config.service.js";
 const app = express();
-const port = 3000;
+const port = PORT
 
 const appBootStrap = async () => {
-    app.use(cors(), express.json());
+    app.use(cors(), express.json()); 
 
     await connectionDB()
     await connectionDB_redis()
-   
+
     app.use("/users", userRouter)
-    app.use("/messages",messageRouter)
-    
+    app.use("/messages", messageRouter)
+
     app.get("/", (req, res, next) => {
         res.status(201).json({ message: "Saraha API is running successfully" });
     })

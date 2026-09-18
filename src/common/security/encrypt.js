@@ -1,8 +1,8 @@
 import crypto from 'node:crypto';
-import 'dotenv/config';
+import { ENCRYPTION_KEY as encryptionKey } from '../../../config/config.service.js';
 
 const ENCRYPTION_KEY = Buffer.from(
-    process.env.ENCRYPTION_KEY,
+    encryptionKey,
     'utf8'
 );
 const IV_LENGTH = 16;
@@ -23,11 +23,11 @@ export function encrypt(text) {
 export function decrypt(text) {
 
     const [ivHex, encryptedText] = text.split(':');
-    
-    const iv = Buffer.from(ivHex, 'hex');    
 
-    const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY , iv);
-    
+    const iv = Buffer.from(ivHex, 'hex');
+
+    const decipher = crypto.createDecipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+
     let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
 
     decrypted += decipher.final('utf8');

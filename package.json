@@ -4,8 +4,8 @@
   "description": "EchoVeil is a privacy-first anonymous messaging backend built with Node.js and Express.",
   "main": "src/main.js",
   "scripts": {
-    "start": "node src/main.js",
-    "dev": "node --watch src/main.js"
+    "start": "cross-env NODE_ENV=production node src/main.js",
+    "dev": "cross-env NODE_ENV=development node --watch src/main.js"
   },
   "keywords": [
     "nodejs",
@@ -30,6 +30,7 @@
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.11.0",
     "cors": "^2.8.6",
+    "cross-env": "^10.1.0",
     "crypto": "^1.0.1",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

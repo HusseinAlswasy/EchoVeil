@@ -14,6 +14,7 @@ import * as redisServices from "../../DB/services/redis_db.services.js";
 import sendEmail, { otp } from "../../common/service/send_email.js";
 import { event_name, eventEmitter } from "../../common/utils/events/sendEmailEvent.js";
 import { emailTemplate } from "../../common/utils/email.template.js";
+import { JWT_REFRESH_SECRET, JWT_SECRET } from "../../../config/config.service.js";
 
 const sendEmailOtp = async ({ email, confirmed } = {}) => {
     const isBlocked = await redisServices.ttl(await redisServices.block_otp_key(email))
@@ -200,13 +201,13 @@ export const signUpWithGmail = async (req, res) => {
     }
     const accessToken = generateToken({
         payload: { id: user._id },
-        secretKey: process.env.JWT_SECRET,
+        secretKey: JWT_SECRET,
         options: { expiresIn: "1h" },
     },);
 
     const refreshToken = generateToken({
         payload: { id: user._id },
-        secretKey: process.env.JWT_REFRESH_SECRET,
+        secretKey: JWT_REFRESH_SECRET,
         options: { expiresIn: "1y" },
     },);
 
@@ -242,7 +243,7 @@ export const login = async (req, res) => {
     let idToken = randomUUID()
     const accessToken = generateToken({
         payload: { id: user._id },
-        secretKey: process.env.JWT_SECRET,
+        secretKey: JWT_SECRET,
         options: {
             expiresIn: "1h", jwtid: idToken
         },
@@ -250,7 +251,7 @@ export const login = async (req, res) => {
 
     const refreshToken = generateToken({
         payload: { id: user._id },
-        secretKey: process.env.JWT_REFRESH_SECRET,
+        secretKey: JWT_REFRESH_SECRET,
         options: {
             expiresIn: "1y", jwtid: idToken,
         },
