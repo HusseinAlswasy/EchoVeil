@@ -5,11 +5,19 @@ import userRouter from "./modules/users/user.controller.js";
 import cors from 'cors';
 import messageRouter from "./modules/messages/message.controller.js";
 import { PORT } from "../config/config.service.js";
+import helmet from "helmet";
+import { rateLimit } from 'express-rate-limit';
 const app = express();
 const port = PORT
 
 const appBootStrap = async () => {
-    app.use(cors(), express.json()); 
+    const limiter = rateLimit({
+        windowMs: 60 * 5 * 1000,
+        limit: 3,
+        message:"Game Over",
+        statusCode:400 
+    })
+    app.use(cors(), helmet(), limiter, express.json());  // cors origin resource sharing 
 
     await connectionDB()
     await connectionDB_redis()

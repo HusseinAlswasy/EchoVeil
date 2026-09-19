@@ -21,7 +21,6 @@ const sendEmail = async ({ to, subject = "Hello From S7S Dev😎", html, attachm
             attachments
         });
 
-        console.log("Message sent: %s", info.accepted);
         return info.accepted.length > 0 ? true : false; 
 
     } catch (err) {
