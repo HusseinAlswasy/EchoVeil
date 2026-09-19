@@ -44,7 +44,7 @@
     "joi": "^18.2.5",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.1",
-    "multer": "^2.2.0",
+    "multer": "^2.3.0",
     "nodemailer": "^10.0.8",
     "ratelimiter": "^3.4.1",
     "redis": "^6.2.1"
