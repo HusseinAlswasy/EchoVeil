@@ -35,3 +35,44 @@ export const multerLocal = ({ customPath = "general", customTypes = [] }) => {
     return upload
 }
 
+// ================= Cloud =================
+
+export const multerCloud = ({
+    customTypes = []
+} = {}) => {
+
+    const storage = multer.memoryStorage();
+
+    function fileFilter(req, file, cb) {        
+
+        const ext = file.originalname
+            .split(".")
+            .pop()
+            .toLowerCase();
+
+        const allowedExt = [
+            "jpg",
+            "jpeg",
+            "png",
+            "gif",
+            "webp"
+        ];
+
+        if (
+            !customTypes.includes(file.mimetype) &&
+            !allowedExt.includes(ext)
+        ) {
+            cb(new Error("Invalid File Type"));
+        } else {
+            cb(null, true);
+        }
+    }
+
+    const upload = multer({
+        storage,
+        fileFilter
+    });
+
+    return upload;
+};
+

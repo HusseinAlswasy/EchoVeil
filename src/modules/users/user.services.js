@@ -15,6 +15,7 @@ import sendEmail, { otp } from "../../common/service/send_email.js";
 import { event_name, eventEmitter } from "../../common/utils/events/sendEmailEvent.js";
 import { emailTemplate } from "../../common/utils/email.template.js";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../../../config/config.service.js";
+import { uploadToCloudinary } from "../../common/utils/cloudinary.js";
 
 const sendEmailOtp = async ({ email, confirmed } = {}) => {
     const isBlocked = await redisServices.ttl(await redisServices.block_otp_key(email))
@@ -79,34 +80,26 @@ export const signUp = async (req, res) => {
 
     const userExist = await userModel.findOne({ email });
     if (userExist) {
-        await deleteUploadedFiles(req.files)
+        // await deleteUploadedFiles(req.files)
         throw new Error("Email Already Exist", { cause: 409 });
     }
+    const profileImage = req?.files?.image?.[0]
+        ? await uploadToCloudinary(
+            req.files.image[0],
+            "EchoVeil/users/profile"
+        )
+        : null;
 
-    // let arr_pathes = []
-    // if (req?.files?.images?.length) {
-    //     for (const files of req.files.images) {
-    //         arr_pathes.push(files.path)
-    //     }
-    // }
+    const coverImage = req?.files?.cover?.[0]
+        ? await uploadToCloudinary(
+            req.files.cover[0],
+            "EchoVeil/users/cover"
+        )
+        : null;
+
     const otpCode = await otp()
     const otpHashed = await hash(otpCode.toString())
-    eventEmitter.emit(event_name.confirmEmail, async () => {
 
-        const emailSent = await sendEmail({
-            to: email,
-            subject: "Email Verification",
-            html: emailTemplate({
-                firstName,
-                email,
-                otp: otpCode,
-            }),
-        })
-
-        if (!emailSent) {
-            throw new Error("Failed to send verification email", { cause: 500 });
-        }
-    })
 
 
     await redisServices.setValue({
@@ -132,10 +125,26 @@ export const signUp = async (req, res) => {
             phone: encrypt(phone),
             age,
             gender,
-            profileImage: req?.files?.image?.length > 0 ? req.files.image[0].path : null,
-            // coverImage: arr_pathes
-        },
+            profileImage: profileImage?.secure_url || null,
+            coverImage: coverImage?.secure_url || null
+        }
     });
+    eventEmitter.emit(event_name.confirmEmail, async () => {
+
+        const emailSent = await sendEmail({
+            to: email,
+            subject: "Email Verification",
+            html: emailTemplate({
+                firstName,
+                email,
+                otp: otpCode,
+            }),
+        })
+
+        if (!emailSent) {
+            throw new Error("Failed to send verification email", { cause: 500 });
+        }
+    })
 
     successResponse({ res, status: 200, data: user })
 }
