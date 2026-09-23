@@ -13,7 +13,7 @@ app.set('trust proxy', 1);
 
 const limiter = rateLimit({
     windowMs: 60 * 5 * 1000,
-    limit: 3,
+    limit: 6,
     message: "Game Over",
     statusCode: 400
 });
