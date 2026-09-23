@@ -9,6 +9,8 @@ import messageRouter from "./modules/messages/message.controller.js";
 
 const app = express();
 
+app.set('trust proxy', 1);
+
 const limiter = rateLimit({
     windowMs: 60 * 5 * 1000,
     limit: 3,

@@ -1,3 +1,6 @@
 import app from "./app.js";
+import { PORT } from "../config/config.service.js";
 
-export default app;
+app.listen(PORT, () => {
+    console.log(`App Work Successfully on port : ${PORT}`);
+});

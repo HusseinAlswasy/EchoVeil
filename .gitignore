@@ -5,3 +5,5 @@
 config/.env.development
 config/.env.production
 /uploads
+.vercel
+.env*
