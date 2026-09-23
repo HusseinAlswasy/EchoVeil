@@ -1,6 +1,6 @@
-import appBootStrap from "./appBootStrap.js";
-import sendEmail from "./common/service/send_email.js";
+import app from "./app.js";
+import { PORT } from "../config/config.service.js";
 
-
-appBootStrap();
-
+app.listen(PORT, () => {
+    console.log(`App Work Successfully on port : ${PORT}`);
+});

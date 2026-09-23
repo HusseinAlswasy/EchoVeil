@@ -21,3 +21,4 @@ export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY
 export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET
 export const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS
 export const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD
+export const REDIS_URL = process.env.REDIS_URL
