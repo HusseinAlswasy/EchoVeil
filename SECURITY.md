@@ -2,20 +2,28 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+We currently provide security updates for the following versions of Social App:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-Use this section to tell people how to report a vulnerability.
+If you discover a security vulnerability in this project, please report it responsibly:
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+- **Do not** open a public GitHub issue for security vulnerabilities.
+- Instead, report it privately by emailing: **your-email@example.com** (استبدلها بإيميلك الحقيقي)
+- Include as much detail as possible: steps to reproduce, affected endpoints, potential impact, and any relevant logs.
+
+### What to expect
+
+- You will receive an acknowledgment within **48 hours** of your report.
+- We will investigate and provide a status update within **7 days**.
+- If the vulnerability is confirmed, we will work on a fix and aim to release a patch as soon as possible, and credit you (if desired) once the fix is public.
+- If the report is declined (e.g., not a valid vulnerability or out of scope), we will explain the reasoning.
+
+## Scope
+
+This policy covers the Social App backend API (Node.js/Express/TypeScript). It does not cover third-party dependencies — please report those directly to their maintainers.
