@@ -14,7 +14,7 @@ We currently provide security updates for the following versions of Social App:
 If you discover a security vulnerability in this project, please report it responsibly:
 
 - **Do not** open a public GitHub issue for security vulnerabilities.
-- Instead, report it privately by emailing: **your-email@example.com** (استبدلها بإيميلك الحقيقي)
+- Instead, report it privately by emailing: **husseinalswasy@gmail.com**
 - Include as much detail as possible: steps to reproduce, affected endpoints, potential impact, and any relevant logs.
 
 ### What to expect
